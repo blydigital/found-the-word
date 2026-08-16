@@ -158,10 +158,105 @@ Whats the Word / Find the Word
 
 
 
+016 - Static MVP interface completed and validated
+
+Replaced the default Next.js starter screen with the first Found the Word interface.
+Established the core visual direction as minimal, quiet, professional, and reference-tool oriented.
+Confirmed responsive behavior on desktop and mobile-sized viewports.
+Confirmed portrait/landscape resizing behavior.
+Established the result hierarchy:
+Best word
+Confidence
+Definition
+Why it fits
+Alternatives
+Feedback
+Established large, separated feedback controls for "That's it" and "Not quite."
+Added a short feedback prompt explaining that feedback helps improve future results.
+Static interface passed lint and production build validation.
+Committed and pushed as:
+Build static MVP interface
 
 
 
+017 - Product observations are tracked separately from product decisions
 
+Documentation/05_PRODUCT_NOTES.md is the working location for usability findings, test observations, and potential improvements.
+Product Notes are not automatically approved requirements.
+Stable product or architecture choices may later be promoted into 04_DECISIONS.md.
+AI agents are instructed to read Product Notes alongside the Founder Specification and Decisions before making product or UI changes.
+
+
+
+018 - AI-assisted development workflow established
+
+Cursor is used as the primary implementation agent.
+AI agents must read project documentation before making meaningful changes.
+Changes should be small, testable, and consistent with the Founder Specification.
+Meaningful changes are tested locally before committing.
+Known-working states are committed with descriptive Git messages and pushed to GitHub.
+
+
+
+019 - First functional search architecture
+
+The first real search flow will use:
+
+User input
+→ Next.js frontend
+→ Next.js Route Handler
+→ OpenAI Responses API
+→ structured result
+→ existing result interface
+
+The browser will not call OpenAI directly.
+
+
+
+020 - OpenAI API key remains server-side
+
+Store the OpenAI development key as OPENAI_API_KEY.
+Do not expose the key through client-side code.
+Do not use a NEXT_PUBLIC_ prefix.
+Do not commit API credentials to Git or GitHub.
+
+
+
+021 - First search response uses a fixed structured result shape
+
+The search endpoint should return:
+
+bestWord
+confidence
+definition
+whyItFits
+exactly three alternatives
+word
+difference
+
+The frontend should render this structured data rather than parsing freeform prose.
+
+
+
+022 - Supabase is excluded from the first functional search milestone
+
+Supabase will not be required to retrieve a word in Version 0.1.
+
+The first functional milestone validates:
+
+User description
+→ OpenAI
+→ useful word result
+
+Supabase will be introduced afterward for search and feedback persistence.
+
+
+
+023 - Clarifying-question flow is deferred until basic search works
+
+The first functional search will always return its best result.
+
+Low-confidence conversational refinement will be implemented only after the direct search path is working and testable.
 
 
 **Milestone 1:**
