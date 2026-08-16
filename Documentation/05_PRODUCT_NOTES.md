@@ -16,11 +16,11 @@ The result should be easier to scan as a whole on a typical desktop viewport, wi
 
 Potential areas to evaluate:
 
-- Vertical spacing between sections
-- Search-area height
-- Result-section spacing
-- Alternative-word spacing
-- Overall information density
+* Vertical spacing between sections
+* Search-area height
+* Result-section spacing
+* Alternative-word spacing
+* Overall information density
 
 Preserve readability and the quiet reference-tool aesthetic rather than making the interface feel compressed.
 
@@ -32,10 +32,31 @@ Evaluate the search and result interface on mobile-sized viewports before consid
 
 Check:
 
-- readability
-- input sizing
-- button placement
-- result hierarchy
-- alternative-word layout
-- feedback controls
-- unnecessary horizontal or vertical space
+* readability
+* input sizing
+* button placement
+* result hierarchy
+* alternative-word layout
+* feedback controls
+* unnecessary horizontal or vertical space
+
+
+
+Static MVP testing observations:
+
+
+
+\- Desktop layout uses excessive vertical spacing relative to content volume.
+
+\- Change "Explanation" to "Definition."
+
+\- Add subtle section separation between Definition, Why it fits, and Alternatives.
+
+\- Increase feedback-button size and touch targets.
+
+\- Add an understated request for feedback explaining that feedback improves future results.
+
+\- Current responsive behavior tested successfully on mobile-sized viewport and rotation.
+
+\- Preserve the existing hierarchy, restrained visual style, and alternative-word separation.
+

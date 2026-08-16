@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Found the Word",
-  description: "Help people find the exact word they're trying to remember.",
+  title: "What's the Word?",
+  description: "Describe the word you're trying to remember.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
