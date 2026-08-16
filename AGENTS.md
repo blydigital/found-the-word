@@ -14,6 +14,7 @@ Before making product, UI, architecture, prompt, or workflow changes, read:
 
 * `Documentation/01_Founder_Specification_v1.md`
 * `Documentation/04_DECISIONS.md`
+* `Documentation/05_PRODUCT_NOTES.md`
 
 Treat those documents as governing project context.
 
