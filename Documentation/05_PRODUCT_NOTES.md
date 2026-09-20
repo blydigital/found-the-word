@@ -60,3 +60,13 @@ Static MVP testing observations:
 
 \- Preserve the existing hierarchy, restrained visual style, and alternative-word separation.
 
+### Search textarea keyboard behavior
+
+**Status:** Future iteration
+
+Enter should eventually submit the search.
+
+Shift+Enter should insert a newline.
+
+Current behavior requires clicking the Search button because Enter inserts a newline.
+

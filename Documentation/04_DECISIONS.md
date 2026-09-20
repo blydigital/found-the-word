@@ -259,6 +259,64 @@ The first functional search will always return its best result.
 Low-confidence conversational refinement will be implemented only after the direct search path is working and testable.
 
 
+
+024 - Three-batch lexical retrieval evaluation completed
+
+Batch 1: Original retrieval instructions
+
+20 tests
+9/20 exact target retrievals = 45%
+12/20 targets appeared as either bestWord or one of the three alternatives = 60%
+
+The system was often optimizing for a semantically defensible answer rather than reconstructing the particular lexical item the user was trying to remember.
+
+Additional observed issues included ranking between close candidates, grammatical-form inference, and confidence representing semantic fit more strongly than confidence in exact target identification.
+
+Intervention after Batch 1
+
+Revised SYSTEM_INSTRUCTIONS.
+Explicitly optimized for reconstruction of the user's intended lexical item.
+Broadened clue weighting across semantic, contextual, grammatical, domain, usage, register, and lexical-form evidence.
+Made lexical-form clues strong evidence when supplied without requiring them.
+Improved grammatical and lexical-form inference.
+Preserved access to common, rare, formal, technical, literary, archaic, slang, and uncommon vocabulary without arbitrarily favoring any category.
+Redefined confidence as confidence that bestWord is the particular item the user is trying to recall rather than merely a semantically valid answer.
+
+Batch 2: Revised retrieval instructions
+
+20 tests
+14/20 exact target retrievals = 70%
+20/20 targets were surfaced in the returned candidate set = 100%
+
+Remaining failures were predominantly ranking, morphological or grammatical-form, or legitimately ambiguous cases rather than broad vocabulary retrieval failures.
+
+Batch 3: Untouched holdout using the same revised instructions
+
+20 tests
+15/20 exact target retrievals = 75%
+18/20 targets were surfaced in the returned candidate set = 90%
+
+No system-prompt changes were made between Batch 2 and Batch 3.
+
+Post-revision aggregate
+
+40 tests
+29/40 exact target retrievals = 72.5%
+38/40 intended targets surfaced somewhere among bestWord plus three alternatives = 95%
+
+
+
+025 - Current one-shot lexical retrieval prompt is the validated baseline
+
+The current one-shot lexical retrieval prompt should be frozen for now.
+
+Do not continue prompt tuning against individual evaluation misses.
+
+The remaining error pattern increasingly reflects ambiguity between plausible lexical candidates, ranking, and grammatical or morphological form rather than inability to retrieve relevant vocabulary.
+
+Further improvement should investigate a tightly constrained clarification or refinement mechanism rather than continuing to expand the one-shot system prompt.
+
+
 **Milestone 1:**
 
 
