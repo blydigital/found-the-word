@@ -317,6 +317,142 @@ The remaining error pattern increasingly reflects ambiguity between plausible le
 Further improvement should investigate a tightly constrained clarification or refinement mechanism rather than continuing to expand the one-shot system prompt.
 
 
+
+026 - Reactive clarification is the next retrieval experiment
+
+The existing validated one-shot retrieval remains unchanged.
+
+Clarification is triggered only when the user explicitly selects Not quite after the initial result.
+
+Do not proactively interrupt the initial search based solely on a confidence threshold.
+
+After Not quite, the system may ask exactly one targeted clarification question. The question should seek the single most useful missing clue for distinguishing among plausible lexical candidates.
+
+Useful dimensions may include spelling fragments, beginning or ending letters, pronunciation or sound, syllables, grammatical form, context, register, technical domain, connotation, remembered morphology, single-word versus phrase, or a direct distinction between competing meanings.
+
+These dimensions are examples, not a hard-coded questionnaire.
+
+Avoid generic questions such as "Can you provide more information?" when a more discriminating question can be generated.
+
+The clarification step must remain tightly constrained and must not become a general conversational chatbot.
+
+Clarification context
+
+The clarification operation should have access to:
+
+the user's original description
+the initial bestWord
+the initial three alternatives
+the fact that the user rejected the initial bestWord
+
+The refinement search should have access to:
+
+the original description
+the previous candidates
+the rejected bestWord
+the clarification question
+the user's clarification response
+
+The refinement should return the existing structured SearchResult shape so the normal result interface can be reused.
+
+For the MVP experiment, allow only one clarification cycle per initial search.
+
+Do not implement persistence, accounts, conversation history, Supabase storage, or general chat.
+
+Evaluation
+
+Preserve the current one-shot retrieval baseline as a separate measurement.
+
+Evaluate clarification using previously failed or ambiguous test cases. Add a metric measuring how often one clarification recovers the intended target.
+
+
+
+027 - Imperfect input remains retrieval evidence
+
+Users should not need to spell, type, or describe a word correctly in order for Found the Word to help them find it.
+
+Typos, misspellings, transposed letters, missing punctuation, malformed grammar, phonetic approximations, incomplete fragments, and uncertain spellings may be useful evidence.
+
+Do not require correctly written input. Do not add spell-checking, autocorrect, preprocessing, a correction interface, or a dependency for correcting user input.
+
+Preserve imperfect lexical attempts because they may be among the strongest clues to the intended word.
+
+Do not silently override explicit remembered lexical clues such as beginning or ending letters, spelling fragments, syllables, or sounds merely because they conflict with an otherwise plausible candidate.
+
+Apparent contradictions and uncertainty should remain available as evidence for retrieval or clarification.
+
+
+
+028 - Reactive clarification completed and validated
+
+The implemented reactive clarification flow has been functionally validated.
+
+Initial search remains unchanged.
+Selecting Not quite generates one targeted clarification question.
+The user's clarification response is used for one refinement retrieval.
+The refined result reuses the existing SearchResult structure.
+A second clarification cycle is not allowed.
+A new initial search resets the clarification state.
+Failed clarification or refinement requests can be retried without incorrectly consuming or creating another clarification cycle.
+The implementation passed lint and production build validation.
+
+Historical-miss retesting
+
+Eleven misses from the previously validated Batch 2 and Batch 3 evaluations were replayed.
+
+Seven of the eleven historical misses became visible among the initial result candidates on replay and did not require clarification.
+
+Four cases still required clarification:
+
+carking was recovered exactly
+distensible was recovered exactly
+congruity moved into the correct lexical family through congruous and congruent, but the exact target was not displayed
+expository moved into the relevant lexical neighborhood through terms such as exposit, but the exact target was not recovered
+
+These results are useful product evidence, not a statistically representative benchmark. Model outputs are nondeterministic, and the retest set intentionally consisted only of historical failures.
+
+Imperfect-input robustness
+
+A separate six-case robustness test intentionally used ordinary typos, phonetic approximations, misspellings, lexical fragments, malformed or fragmentary grammar, contradictory remembered clues, and severely messy but information-rich input.
+
+Targets included ambivalent, perspicacious, surreptitious, intransigent, belligerent, and circumlocution.
+
+The testing supported the product principle that users should not need to spell, type, or describe a word correctly for Found the Word to help retrieve it.
+
+The system successfully used imperfect phonetic and lexical clues as evidence rather than requiring preprocessing or correction.
+
+In the deliberately contradictory belligerent test, the initial result followed an incorrect remembered P clue. After Not quite, the clarification operation explicitly identified the conflict between that clue and the remembered sound and asked the user to resolve it. Refinement then surfaced belligerent among the alternatives.
+
+This small targeted robustness test is not a general accuracy benchmark.
+
+
+
+029 - Current retrieval instructions are frozen
+
+Freeze the current one-shot retrieval instructions and the current clarification and refinement instructions for now.
+
+Do not continue prompt tuning against individual misses at this stage.
+
+Current evidence suggests that additional near-term product improvement is more likely to come from making better use of already-retrieved candidates than from repeatedly tuning prompts for ranking edge cases.
+
+Prompt changes may be reconsidered if broader production evidence reveals a systematic failure worth addressing.
+
+
+
+030 - Selectable Alternatives is the next planned MVP improvement
+
+Testing repeatedly showed cases where the intended word was already visible among the three Alternatives even though bestWord was not the intended target.
+
+From the user's perspective, seeing the intended word may already produce the desired "AHA" moment.
+
+The next product-design task should investigate allowing the user to identify an Alternative directly as the intended word rather than requiring unnecessary clarification or another model request.
+
+Recognition of an already-returned candidate should be preferred over unnecessary additional inference.
+
+Do not implement selectable Alternatives until that product-design work is complete.
+
+
+
 **Milestone 1:**
 
 

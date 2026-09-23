@@ -13,11 +13,27 @@ type SearchResult = {
   }>;
 };
 
+type ClarificationPhase =
+  | "idle"
+  | "requesting-question"
+  | "awaiting-response"
+  | "refining"
+  | "complete";
+
 export default function Home() {
   const [description, setDescription] = useState("");
   const [result, setResult] = useState<SearchResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [submittedDescription, setSubmittedDescription] = useState("");
+  const [initialResult, setInitialResult] = useState<SearchResult | null>(null);
+  const [clarificationQuestion, setClarificationQuestion] = useState("");
+  const [clarificationResponse, setClarificationResponse] = useState("");
+  const [clarificationPhase, setClarificationPhase] =
+    useState<ClarificationPhase>("idle");
+  const [clarificationError, setClarificationError] = useState<string | null>(
+    null,
+  );
 
   async function handleSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -28,6 +44,8 @@ export default function Home() {
       return;
     }
 
+    const currentDescription = description;
+
     setIsLoading(true);
     setError(null);
     setResult(null);
@@ -36,7 +54,7 @@ export default function Home() {
       const response = await fetch("/api/search", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ description }),
+        body: JSON.stringify({ description: currentDescription }),
       });
 
       if (!response.ok) {
@@ -45,10 +63,103 @@ export default function Home() {
 
       const searchResult = (await response.json()) as SearchResult;
       setResult(searchResult);
+      setSubmittedDescription(currentDescription);
+      setInitialResult(null);
+      setClarificationQuestion("");
+      setClarificationResponse("");
+      setClarificationPhase("idle");
+      setClarificationError(null);
     } catch {
       setError("We could not complete your search. Please try again.");
     } finally {
       setIsLoading(false);
+    }
+  }
+
+  async function handleNotQuite() {
+    if (
+      !result ||
+      !submittedDescription ||
+      clarificationPhase !== "idle"
+    ) {
+      return;
+    }
+
+    const previousResult = result;
+
+    setInitialResult(previousResult);
+    setClarificationError(null);
+    setClarificationPhase("requesting-question");
+
+    try {
+      const response = await fetch("/api/clarify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          originalDescription: submittedDescription,
+          previousResult,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Clarification request failed.");
+      }
+
+      const data = (await response.json()) as { question: string };
+      setClarificationQuestion(data.question);
+      setClarificationResponse("");
+      setClarificationPhase("awaiting-response");
+    } catch {
+      setClarificationPhase("idle");
+      setClarificationError(
+        "We could not prepare a clarification question. Please try again.",
+      );
+    }
+  }
+
+  async function handleRefinement(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (
+      clarificationPhase !== "awaiting-response" ||
+      !initialResult ||
+      !clarificationQuestion
+    ) {
+      return;
+    }
+
+    if (!clarificationResponse.trim()) {
+      setClarificationError("Enter a response before refining the search.");
+      return;
+    }
+
+    setClarificationError(null);
+    setClarificationPhase("refining");
+
+    try {
+      const response = await fetch("/api/refine", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          originalDescription: submittedDescription,
+          previousResult: initialResult,
+          clarificationQuestion,
+          clarificationResponse,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Refinement request failed.");
+      }
+
+      const refinedResult = (await response.json()) as SearchResult;
+      setResult(refinedResult);
+      setClarificationPhase("complete");
+    } catch {
+      setClarificationPhase("awaiting-response");
+      setClarificationError(
+        "We could not refine your search. Please try again.",
+      );
     }
   }
 
@@ -62,6 +173,20 @@ export default function Home() {
     event.preventDefault();
 
     if (!isLoading) {
+      event.currentTarget.form?.requestSubmit();
+    }
+  }
+
+  function handleClarificationKeyDown(
+    event: KeyboardEvent<HTMLTextAreaElement>,
+  ) {
+    if (event.key !== "Enter" || event.shiftKey) {
+      return;
+    }
+
+    event.preventDefault();
+
+    if (clarificationPhase === "awaiting-response") {
       event.currentTarget.form?.requestSubmit();
     }
   }
@@ -202,11 +327,77 @@ export default function Home() {
               </button>
               <button
                 type="button"
-                className="min-h-14 w-[calc(50%-0.5rem)] rounded-md border border-slate-300 bg-white px-4 py-3.5 text-base font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-600 sm:w-[15.25rem]"
+                onClick={handleNotQuite}
+                disabled={clarificationPhase !== "idle"}
+                className="min-h-14 w-[calc(50%-0.5rem)] rounded-md border border-slate-300 bg-white px-4 py-3.5 text-base font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-600 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 sm:w-[15.25rem]"
               >
-                Not quite
+                {clarificationPhase === "requesting-question"
+                  ? "Preparing..."
+                  : "Not quite"}
               </button>
             </div>
+
+            {clarificationPhase === "requesting-question" && (
+              <p
+                role="status"
+                aria-live="polite"
+                className="mt-4 text-sm text-slate-600"
+              >
+                Preparing one clarification question.
+              </p>
+            )}
+
+            {(clarificationPhase === "awaiting-response" ||
+              clarificationPhase === "refining") && (
+              <form
+                onSubmit={handleRefinement}
+                className="mt-6 border-t border-slate-200 pt-5"
+              >
+                <label
+                  htmlFor="clarification-response"
+                  className="block font-semibold text-slate-950"
+                >
+                  {clarificationQuestion}
+                </label>
+                <textarea
+                  id="clarification-response"
+                  name="clarification-response"
+                  rows={3}
+                  maxLength={1000}
+                  value={clarificationResponse}
+                  onChange={(event) =>
+                    setClarificationResponse(event.target.value)
+                  }
+                  onKeyDown={handleClarificationKeyDown}
+                  aria-describedby={
+                    clarificationError ? "clarification-error" : undefined
+                  }
+                  aria-invalid={Boolean(clarificationError)}
+                  className="mt-3 block w-full resize-y rounded-lg border border-slate-300 bg-white px-4 py-3.5 text-base leading-7 text-slate-950 shadow-sm outline-none focus:border-slate-600 focus:ring-2 focus:ring-slate-200"
+                />
+                <div className="mt-4 flex justify-end">
+                  <button
+                    type="submit"
+                    disabled={clarificationPhase === "refining"}
+                    className="rounded-md bg-slate-900 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:bg-slate-500"
+                  >
+                    {clarificationPhase === "refining"
+                      ? "Refining..."
+                      : "Refine search"}
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {clarificationError && (
+              <p
+                id="clarification-error"
+                role="alert"
+                className="mt-3 text-sm text-red-700"
+              >
+                {clarificationError}
+              </p>
+            )}
           </div>
         </article>
       )}

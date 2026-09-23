@@ -70,3 +70,37 @@ Shift+Enter should insert a newline.
 
 Current behavior requires clicking the Search button because Enter inserts a newline.
 
+### Selectable alternative words
+
+**Status:** Next planned MVP improvement
+
+The intended target appeared somewhere among bestWord plus the three alternatives in 95% of the 40 post-revision evaluation tests.
+
+Users may recognize their intended word immediately among Alternatives. The next product-design task should investigate making alternative words directly selectable as successful answers.
+
+For example, if bestWord is Vambrace but the user recognizes Bracer under Alternatives, selecting Bracer could directly register "That's it" without another model request or clarification question.
+
+This should be part of an eventual interaction hierarchy in which recognition of an already-returned candidate is preferred over unnecessary additional inference.
+
+This behavior is not yet implemented.
+
+### Lexical-family and morphological-form retrieval
+
+**Status:** Ongoing product observation
+
+Testing has repeatedly shown that lexical-family retrieval is stronger than exact morphological or grammatical-form ranking.
+
+Observed relationships include:
+
+* ambivalent / ambivalence
+* congruity / congruous / congruent
+* expository / exposit
+* zeal / zealous
+* pendulous / pendulum
+* flog / flogging
+* drowse / drowsing
+
+Preserve the distinction between strict exact-target evaluation and practical product success.
+
+A related grammatical form may fail exact-string evaluation while still triggering the user's intended "AHA" recognition.
+
