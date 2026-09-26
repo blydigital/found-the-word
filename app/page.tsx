@@ -20,6 +20,12 @@ type ClarificationPhase =
   | "refining"
   | "complete";
 
+type FeedbackOutcome =
+  | { kind: "bestWord"; word: string }
+  | { kind: "alternative"; index: 0 | 1 | 2; word: string }
+  | { kind: "none" }
+  | null;
+
 export default function Home() {
   const [description, setDescription] = useState("");
   const [result, setResult] = useState<SearchResult | null>(null);
@@ -34,6 +40,17 @@ export default function Home() {
   const [clarificationError, setClarificationError] = useState<string | null>(
     null,
   );
+  const [feedbackOutcome, setFeedbackOutcome] =
+    useState<FeedbackOutcome>(null);
+
+  const acceptedOutcome =
+    feedbackOutcome?.kind === "bestWord" ||
+    feedbackOutcome?.kind === "alternative"
+      ? feedbackOutcome
+      : null;
+  const candidateSelectionEnabled =
+    !acceptedOutcome &&
+    (clarificationPhase === "idle" || clarificationPhase === "complete");
 
   async function handleSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -69,6 +86,7 @@ export default function Home() {
       setClarificationResponse("");
       setClarificationPhase("idle");
       setClarificationError(null);
+      setFeedbackOutcome(null);
     } catch {
       setError("We could not complete your search. Please try again.");
     } finally {
@@ -80,7 +98,8 @@ export default function Home() {
     if (
       !result ||
       !submittedDescription ||
-      clarificationPhase !== "idle"
+      clarificationPhase !== "idle" ||
+      feedbackOutcome !== null
     ) {
       return;
     }
@@ -90,6 +109,7 @@ export default function Home() {
     setInitialResult(previousResult);
     setClarificationError(null);
     setClarificationPhase("requesting-question");
+    setFeedbackOutcome({ kind: "none" });
 
     try {
       const response = await fetch("/api/clarify", {
@@ -111,6 +131,7 @@ export default function Home() {
       setClarificationPhase("awaiting-response");
     } catch {
       setClarificationPhase("idle");
+      setFeedbackOutcome(null);
       setClarificationError(
         "We could not prepare a clarification question. Please try again.",
       );
@@ -155,12 +176,32 @@ export default function Home() {
       const refinedResult = (await response.json()) as SearchResult;
       setResult(refinedResult);
       setClarificationPhase("complete");
+      setFeedbackOutcome(null);
     } catch {
       setClarificationPhase("awaiting-response");
       setClarificationError(
         "We could not refine your search. Please try again.",
       );
     }
+  }
+
+  function handleBestWordAccepted() {
+    if (!result || !candidateSelectionEnabled) {
+      return;
+    }
+
+    setFeedbackOutcome({ kind: "bestWord", word: result.bestWord });
+  }
+
+  function handleAlternativeAccepted(index: number, word: string) {
+    if (
+      !candidateSelectionEnabled ||
+      (index !== 0 && index !== 1 && index !== 2)
+    ) {
+      return;
+    }
+
+    setFeedbackOutcome({ kind: "alternative", index, word });
   }
 
   function handleDescriptionKeyDown(
@@ -295,108 +336,149 @@ export default function Home() {
               <h3 className="text-sm font-semibold text-slate-950">
                 Alternatives
               </h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                Select a word if it&apos;s the one you meant.
+              </p>
               <ul className="mt-3 divide-y divide-slate-200 border-y border-slate-200">
-                {result.alternatives.map((alternative, index) => (
-                  <li
-                    key={`${alternative.word}-${index}`}
-                    className="py-3.5 leading-7 text-slate-700"
-                  >
-                    <span className="font-semibold text-slate-950">
-                      {alternative.word}.
-                    </span>{" "}
-                    {alternative.difference}
-                  </li>
-                ))}
+                {result.alternatives.map((alternative, index) => {
+                  const isAcceptedAlternative =
+                    acceptedOutcome?.kind === "alternative" &&
+                    acceptedOutcome.index === index;
+
+                  return (
+                    <li
+                      key={`${alternative.word}-${index}`}
+                      className="py-3.5 leading-7 text-slate-700"
+                    >
+                      {candidateSelectionEnabled ? (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleAlternativeAccepted(index, alternative.word)
+                          }
+                          aria-label={`Select ${alternative.word} as the intended word`}
+                          className="rounded-sm font-semibold text-slate-950 underline decoration-slate-300 underline-offset-4 hover:decoration-slate-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-600"
+                        >
+                          {alternative.word}
+                        </button>
+                      ) : (
+                        <span className="font-semibold text-slate-950">
+                          {alternative.word}
+                        </span>
+                      )}
+                      .{" "}
+                      {isAcceptedAlternative && (
+                        <span className="mr-2 inline-block text-sm font-semibold text-slate-950">
+                          ✓ That&apos;s it
+                        </span>
+                      )}
+                      {alternative.difference}
+                    </li>
+                  );
+                })}
               </ul>
             </section>
           </div>
 
           <div className="border-t border-slate-200 pt-5">
-            <p className="font-semibold text-slate-950">
-              Was this the word you were looking for?
-            </p>
-            <p className="mt-1 text-sm leading-6 text-slate-600">
-              Your feedback helps improve future results.
-            </p>
-            <div className="mt-4 flex justify-between gap-4 sm:gap-6">
-              <button
-                type="button"
-                className="min-h-14 w-[calc(50%-0.5rem)] rounded-md border border-slate-900 bg-slate-900 px-4 py-3.5 text-base font-semibold text-white hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 sm:w-[15.25rem]"
-              >
-                That&apos;s it
-              </button>
-              <button
-                type="button"
-                onClick={handleNotQuite}
-                disabled={clarificationPhase !== "idle"}
-                className="min-h-14 w-[calc(50%-0.5rem)] rounded-md border border-slate-300 bg-white px-4 py-3.5 text-base font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-600 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 sm:w-[15.25rem]"
-              >
-                {clarificationPhase === "requesting-question"
-                  ? "Preparing..."
-                  : "Not quite"}
-              </button>
-            </div>
-
-            {clarificationPhase === "requesting-question" && (
-              <p
-                role="status"
-                aria-live="polite"
-                className="mt-4 text-sm text-slate-600"
-              >
-                Preparing one clarification question.
-              </p>
-            )}
-
-            {(clarificationPhase === "awaiting-response" ||
-              clarificationPhase === "refining") && (
-              <form
-                onSubmit={handleRefinement}
-                className="mt-6 border-t border-slate-200 pt-5"
-              >
-                <label
-                  htmlFor="clarification-response"
-                  className="block font-semibold text-slate-950"
-                >
-                  {clarificationQuestion}
-                </label>
-                <textarea
-                  id="clarification-response"
-                  name="clarification-response"
-                  rows={3}
-                  maxLength={1000}
-                  value={clarificationResponse}
-                  onChange={(event) =>
-                    setClarificationResponse(event.target.value)
-                  }
-                  onKeyDown={handleClarificationKeyDown}
-                  aria-describedby={
-                    clarificationError ? "clarification-error" : undefined
-                  }
-                  aria-invalid={Boolean(clarificationError)}
-                  className="mt-3 block w-full resize-y rounded-lg border border-slate-300 bg-white px-4 py-3.5 text-base leading-7 text-slate-950 shadow-sm outline-none focus:border-slate-600 focus:ring-2 focus:ring-slate-200"
-                />
-                <div className="mt-4 flex justify-end">
+            {acceptedOutcome ? (
+              <div role="status" aria-live="polite">
+                <p className="font-semibold text-slate-950">✓ That&apos;s it</p>
+                <p className="mt-1 text-sm leading-6 text-slate-600">
+                  Thanks for the feedback!
+                </p>
+              </div>
+            ) : (
+              <>
+                <p className="font-semibold text-slate-950">
+                  Was this the word you were looking for?
+                </p>
+                <p className="mt-1 text-sm leading-6 text-slate-600">
+                  Your feedback helps improve future results.
+                </p>
+                <div className="mt-4 flex justify-between gap-4 sm:gap-6">
                   <button
-                    type="submit"
-                    disabled={clarificationPhase === "refining"}
-                    className="rounded-md bg-slate-900 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:bg-slate-500"
+                    type="button"
+                    onClick={handleBestWordAccepted}
+                    disabled={!candidateSelectionEnabled}
+                    className="min-h-14 w-[calc(50%-0.5rem)] rounded-md border border-slate-900 bg-slate-900 px-4 py-3.5 text-base font-semibold text-white hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:bg-slate-500 sm:w-[15.25rem]"
                   >
-                    {clarificationPhase === "refining"
-                      ? "Refining..."
-                      : "Refine search"}
+                    That&apos;s it
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleNotQuite}
+                    disabled={clarificationPhase !== "idle"}
+                    className="min-h-14 w-[calc(50%-0.5rem)] rounded-md border border-slate-300 bg-white px-4 py-3.5 text-base font-semibold text-slate-700 hover:border-slate-400 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-600 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 sm:w-[15.25rem]"
+                  >
+                    {clarificationPhase === "requesting-question"
+                      ? "Preparing..."
+                      : "Not quite"}
                   </button>
                 </div>
-              </form>
-            )}
 
-            {clarificationError && (
-              <p
-                id="clarification-error"
-                role="alert"
-                className="mt-3 text-sm text-red-700"
-              >
-                {clarificationError}
-              </p>
+                {clarificationPhase === "requesting-question" && (
+                  <p
+                    role="status"
+                    aria-live="polite"
+                    className="mt-4 text-sm text-slate-600"
+                  >
+                    Preparing one clarification question.
+                  </p>
+                )}
+
+                {(clarificationPhase === "awaiting-response" ||
+                  clarificationPhase === "refining") && (
+                  <form
+                    onSubmit={handleRefinement}
+                    className="mt-6 border-t border-slate-200 pt-5"
+                  >
+                    <label
+                      htmlFor="clarification-response"
+                      className="block font-semibold text-slate-950"
+                    >
+                      {clarificationQuestion}
+                    </label>
+                    <textarea
+                      id="clarification-response"
+                      name="clarification-response"
+                      rows={3}
+                      maxLength={1000}
+                      value={clarificationResponse}
+                      onChange={(event) =>
+                        setClarificationResponse(event.target.value)
+                      }
+                      onKeyDown={handleClarificationKeyDown}
+                      aria-describedby={
+                        clarificationError ? "clarification-error" : undefined
+                      }
+                      aria-invalid={Boolean(clarificationError)}
+                      className="mt-3 block w-full resize-y rounded-lg border border-slate-300 bg-white px-4 py-3.5 text-base leading-7 text-slate-950 shadow-sm outline-none focus:border-slate-600 focus:ring-2 focus:ring-slate-200"
+                    />
+                    <div className="mt-4 flex justify-end">
+                      <button
+                        type="submit"
+                        disabled={clarificationPhase === "refining"}
+                        className="rounded-md bg-slate-900 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:bg-slate-500"
+                      >
+                        {clarificationPhase === "refining"
+                          ? "Refining..."
+                          : "Refine search"}
+                      </button>
+                    </div>
+                  </form>
+                )}
+
+                {clarificationError && (
+                  <p
+                    id="clarification-error"
+                    role="alert"
+                    className="mt-3 text-sm text-red-700"
+                  >
+                    {clarificationError}
+                  </p>
+                )}
+              </>
             )}
           </div>
         </article>

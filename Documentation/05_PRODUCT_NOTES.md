@@ -72,17 +72,39 @@ Current behavior requires clicking the Search button because Enter inserts a new
 
 ### Selectable alternative words
 
-**Status:** Next planned MVP improvement
+**Status:** Design complete; awaiting implementation
 
 The intended target appeared somewhere among bestWord plus the three alternatives in 95% of the 40 post-revision evaluation tests.
 
-Users may recognize their intended word immediately among Alternatives. The next product-design task should investigate making alternative words directly selectable as successful answers.
+Users may recognize their intended word immediately among Alternatives. Alternative words should be directly selectable as successful answers.
 
 For example, if bestWord is Vambrace but the user recognizes Bracer under Alternatives, selecting Bracer could directly register "That's it" without another model request or clarification question.
 
-This should be part of an eventual interaction hierarchy in which recognition of an already-returned candidate is preferred over unnecessary additional inference.
+Preferred instructional copy under Alternatives:
 
-This behavior is not yet implemented.
+Select a word if it's the one you meant.
+
+Selecting That's it confirms bestWord.
+
+Selecting an Alternative confirms that specific Alternative.
+
+Selecting Not quite means none of the displayed candidates is correct and begins reactive clarification.
+
+A successful selection removes the unresolved main feedback controls and replaces them with:
+
+✓ That's it
+
+Thanks for the feedback!
+
+Keep all result content and Alternatives visible. Alternatives are no longer interactive after success.
+
+When an Alternative was selected, identify it in its existing row with a restrained ✓ That's it treatment. Keep the other Alternatives visible.
+
+Apply the same completion behavior to initial and refined results.
+
+Recognition of an already-returned candidate is preferred over unnecessary additional inference.
+
+The interaction is specified in Decision 031 and is not yet implemented.
 
 ### Lexical-family and morphological-form retrieval
 

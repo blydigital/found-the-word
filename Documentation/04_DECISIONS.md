@@ -453,6 +453,95 @@ Do not implement selectable Alternatives until that product-design work is compl
 
 
 
+031 - Selectable Alternatives interaction designed
+
+The result interface represents four candidate words:
+
+bestWord
+Alternative 1
+Alternative 2
+Alternative 3
+
+Feedback semantics
+
+Selecting That's it confirms that bestWord is the intended word.
+
+Selecting an Alternative confirms that specific Alternative is the intended word.
+
+Selecting Not quite means none of the four displayed candidates is the intended word and begins the existing reactive clarification flow.
+
+Alternative words should be directly selectable.
+
+Under the Alternatives heading, include concise instructional copy:
+
+Select a word if it's the one you meant.
+
+Keep this treatment understated and consistent with the existing utility-like interface. Do not turn every Alternative into a large visually dominant button.
+
+Successful selection
+
+Selecting either That's it for bestWord or an Alternative is a successful completion of the current search interaction.
+
+On success:
+
+visually identify the accepted word with a restrained success treatment such as a checkmark and That's it
+show a concise thank-you message such as "Thanks for the feedback!"
+do not open a modal
+do not navigate to another page
+do not invoke clarification
+do not make another model request
+do not promote an Alternative into the primary result presentation
+do not reinterpret an Alternative's difference text as a definition or whyItFits explanation
+remove the unresolved main feedback controls so one search has only one authoritative accepted outcome
+
+Keep all result content and all Alternatives visible after success.
+
+After success, Alternatives are no longer interactive.
+
+Replace the unresolved main feedback area with this restrained completion state:
+
+✓ That's it
+
+Thanks for the feedback!
+
+When an Alternative was selected, identify that Alternative in its existing row with a restrained ✓ That's it treatment. Do not remove the other Alternatives.
+
+Apply the same successful-completion behavior to initial and refined results.
+
+Clarification relationship
+
+Selecting an Alternative before Not quite ends the interaction successfully and must not invoke clarification.
+
+Selecting Not quite preserves the existing one-question reactive clarification flow.
+
+After a refined result, the refined bestWord and refined Alternatives remain selectable as successful answers.
+
+The existing one-clarification-cycle limit remains unchanged. Do not introduce a second Not quite path.
+
+State semantics
+
+No persistence or database work is included in this implementation.
+
+Client-side state should distinguish conceptually between:
+
+bestWord accepted
+Alternative 1 accepted
+Alternative 2 accepted
+Alternative 3 accepted
+none accepted, leading to clarification
+
+This preserves useful future ranking-feedback semantics without implementing storage.
+
+Implementation constraints
+
+Do not modify retrieval, clarification, or refinement prompts.
+Do not modify the SearchResult API schema.
+Do not make another OpenAI request when an Alternative is selected.
+Do not add Supabase, persistence, analytics, dependencies, or unrelated product behavior.
+Preserve the existing clean, concise, professional interface.
+
+
+
 **Milestone 1:**
 
 
