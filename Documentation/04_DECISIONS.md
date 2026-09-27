@@ -439,7 +439,7 @@ Prompt changes may be reconsidered if broader production evidence reveals a syst
 
 
 
-030 - Selectable Alternatives is the next planned MVP improvement
+030 - Selectable Alternatives identified as the next planned MVP improvement
 
 Testing repeatedly showed cases where the intended word was already visible among the three Alternatives even though bestWord was not the intended target.
 
@@ -449,7 +449,7 @@ The next product-design task should investigate allowing the user to identify an
 
 Recognition of an already-returned candidate should be preferred over unnecessary additional inference.
 
-Do not implement selectable Alternatives until that product-design work is complete.
+The product-design work was completed in Decision 031. Implementation and validation are recorded in Decision 032.
 
 
 
@@ -542,9 +542,307 @@ Preserve the existing clean, concise, professional interface.
 
 
 
-**Milestone 1:**
+032 - Validated lexical-product baseline established for Public MVP development
+
+The current lexical interaction is the validated product baseline for Public MVP development.
+
+The validated product supports:
+
+free-form lexical descriptions
+semantic clues
+lexical-form clues
+imperfect-input tolerance
+one-shot bestWord retrieval
+confidence
+concise Definition
+concise Why it fits
+exactly three Alternatives
+direct bestWord acceptance
+direct Alternative acceptance
+one bounded reactive clarification cycle after Not quite
+refined candidate retrieval
+successful bestWord or Alternative acceptance after refinement
+
+Decision 031 has been implemented and manually validated.
+
+Validated behavior includes:
+
+main That's it acceptance
+initial Alternative acceptance
+continuation from Not quite into the bounded clarification flow
+acceptance of refined bestWord and refined Alternatives
+the approved successful-completion state and thank-you message
+no additional model or API request when an Alternative is accepted
+keyboard-accessible native button semantics for selectable Alternatives
+desktop and mobile behavior
+
+The validated selectable-Alternatives implementation checkpoint is:
+
+`f4a9330 - Add selectable alternative feedback`
+
+The validated retrieval, clarification, and refinement prompts remain frozen under Decisions 025 and 029.
+
+Public MVP Production Readiness should wrap, protect, measure, deploy, and operate this validated lexical product.
+
+Do not reopen lexical feature development or prompt tuning without evidence of a systematic retrieval problem.
 
 
 
-Describe a word > Search > Impudent > Explanation > 👍 or 👎
+033 - Public MVP Production Readiness established as the next major development objective
+
+Release objective
+
+"A public user can visit FoundTheWord.com, search safely and anonymously, receive the validated lexical experience, provide useful feedback, and leave, while Bly Digital Holdings can measure product performance, understand operating cost, detect failures or abuse, and place deliberate limits on financial exposure."
+
+Governing financial principle
+
+"Found the Word must know approximately what each successful retrieval costs, and abnormal usage must not have open-ended authority to spend Bly Digital Holdings' money."
+
+Initial planning assumptions
+
+The following are founder capital-allocation guardrails. They are initial planning assumptions, not permanent limits or hard-coded application requirements:
+
+broader public-validation experiment envelope: approximately $500
+initial automatic monthly operating authority: approximately $100–150
+paid customer acquisition during initial public validation: $0
+
+These assumptions may be deliberately revised based on legitimate traffic, measured product performance, actual operating costs, and product economics.
+
+Do not implement these amounts as application behavior without a separate approved implementation decision.
+
+Public MVP Production Readiness strategic framework
+
+The following eight phases describe the strategic structure for moving Found the Word from the validated lexical-product baseline to controlled public deployment and subsequent evidence-driven optimization.
+
+Phase 0 — Close the validated product baseline
+
+Reconcile project documentation with the implemented and validated product.
+
+Correct stale status information, record the current known-good implementation checkpoint, and establish the existing lexical interaction as the frozen baseline for production-readiness work.
+
+Phase 0 is represented by Step 1 of the authoritative implementation roadmap. Decision 032 and the related Product Notes reconciliation complete this documentation step.
+
+Phase 1 — Security, abuse prevention & financial guardrails
+
+Protect the public-facing application, API routes, OpenAI usage, infrastructure, and Bly Digital Holdings' financial exposure before anonymous public use.
+
+This phase includes:
+
+threat modeling
+financial guardrails
+rate limiting
+abuse controls
+request protection
+secrets review
+cost containment
+an emergency shutdown procedure
+
+The goal is a defensible public-internet baseline with deliberately bounded financial exposure, not unlimited defensive complexity.
+
+Phase 2 — Supabase product-learning system
+
+Introduce the minimum secure persistence required to measure whether Found the Word works for real users.
+
+Design the data model and privacy treatment before implementation.
+
+Preserve the existing no-account product model.
+
+Capture useful structured feedback semantics such as:
+
+bestWord acceptance
+Alternative 1 acceptance
+Alternative 2 acceptance
+Alternative 3 acceptance
+rejection of the displayed candidate set
+clarification use
+refinement success
+unresolved outcomes
+
+Do not assume that all raw user text should be retained.
+
+Determine the minimum data necessary for product learning before deciding whether original descriptions, clarification questions, clarification responses, returned words, or other potentially user-generated content should be stored.
+
+Phase 3 — Cost telemetry & operational observability
+
+Replace estimated economics with measured economics and establish sufficient operational visibility to understand:
+
+API usage
+token consumption
+inference cost
+latency
+failures
+rate-limit events
+abnormal usage
+product performance
+
+Found the Word should eventually be able to estimate:
+
+average inference cost per initial search
+average inference cost per clarification and refinement cycle
+average cost per completed session
+cost per successful retrieval or That's it outcome
+
+Operational observability should be sufficient to detect abnormal traffic, failures, or spending without building unnecessary enterprise-scale infrastructure.
+
+Phase 4 — Privacy, legal & public-site trust layer
+
+Determine privacy and legal requirements from the system's actual data practices rather than drafting policies before those practices are known.
+
+Establish appropriate treatment of:
+
+stored user text
+structured usage data
+retention
+analytics
+cookies where applicable
+third-party processors
+public privacy disclosures
+terms
+ownership information
+related trust requirements
+
+Complete the public-facing site shell required for a credible standalone utility, including appropriate:
+
+FAQ or help content
+Bly Digital Holdings ownership and footer treatment
+metadata
+accessibility review
+polished error and loading states
+final responsive presentation
+
+The core search experience should remain clean, concise, and utility-like.
+
+Phase 5 — Deployment pipeline & production validation
+
+Move deliberately through:
+
+local development
+Vercel preview deployment
+production validation
+production deployment
+
+Verify that the production environment preserves the validated lexical behavior while security controls, telemetry, persistence, financial controls, accessibility, mobile and desktop behavior, and safe failure handling work outside localhost.
+
+Phase 6 — Controlled public launch
+
+Connect FoundTheWord.com and expose the product to a deliberately limited initial real-user population.
+
+The purpose is validation and measurement, not immediate scale.
+
+Observe real-user:
+
+retrieval success
+bestWord acceptance
+Alternative acceptance
+clarification behavior
+clarification recovery
+unresolved searches
+latency
+failures
+cost
+abuse patterns
+
+Do not initially purchase traffic simply to manufacture usage.
+
+Phase 7 — Monetization and evidence-driven optimization
+
+After meaningful real-user evidence exists, evaluate:
+
+display advertising
+model-cost optimization
+prompt changes
+growth spending
+
+Advertising, model switching, prompt retuning, and paid customer acquisition should be justified by measured product behavior and economics rather than implemented speculatively before launch.
+
+Monetization should not degrade the core lexical-retrieval experience.
+
+Authoritative implementation roadmap
+
+The eight phases describe where the product is in the overall Public MVP Production Readiness effort.
+
+The following 14-step sequence defines what is executed next and is authoritative when determining execution order:
+
+1. Documentation reconciliation
+2. Threat model + financial guardrails
+3. Security/rate limiting/abuse controls
+4. Supabase data-design and privacy decision
+5. Implement secure feedback/search telemetry
+6. Implement API cost + operational telemetry
+7. Privacy and legal requirements based on actual data practices
+8. Finish public-site shell/FAQ/footer/metadata/accessibility
+9. Vercel preview deployment
+10. Production security and functional validation
+11. Connect FoundTheWord.com
+12. Controlled public launch
+13. Measure real users
+14. Only then evaluate ads, model-cost optimization, prompt changes, or growth spending
+
+Preserve both the eight-phase strategic framework and the 14-step implementation roadmap.
+
+Do not collapse the phase structure into the implementation sequence or replace the numbered implementation sequence with the phase structure.
+
+Explicit deferrals
+
+Public MVP Production Readiness does not authorize implementation of:
+
+user accounts
+subscriptions
+saved user search history
+community or social features
+native mobile applications
+browser extensions
+writing integrations
+a public API product
+multilingual retrieval
+image or drawing input
+general-purpose chatbot behavior
+unlimited clarification
+speculative prompt retuning
+model switching without comparative evidence
+paid customer acquisition during initial validation
+display-ad implementation before meaningful real usage and economics are measured
+
+These remain future, separately approved, or evidence-triggered work.
+
+The production-readiness roadmap is not permission to implement future-vision features.
+
+Immediate next bounded work item
+
+After Documentation Reconciliation, the next bounded work item is:
+
+"Production Threat Model & Financial Guardrail Design"
+
+This is Step 2 of the authoritative implementation roadmap.
+
+It is a design and review task before implementation.
+
+Its purpose is to:
+
+identify every path by which an anonymous public user can trigger a paid operation or consume material resources
+identify abuse and misuse paths
+identify accidental resource-consumption paths
+determine appropriate initial controls and thresholds
+distinguish provider-level controls from application-level controls
+determine what should happen when limits are reached
+establish monitoring expectations
+establish an emergency shutdown procedure
+
+The current paid AI operations include:
+
+POST /api/search
+POST /api/clarify
+POST /api/refine
+
+Future Vercel and Supabase resource consumption should also be considered where appropriate.
+
+Do not design or implement these controls as part of Documentation Reconciliation.
+
+
+
+**Validated lexical-product baseline:**
+
+
+
+Describe a word > Search > bestWord, confidence, Definition, Why it fits, and three Alternatives > accept bestWord or an Alternative, or select Not quite > one targeted clarification > refined candidates > accept refined bestWord or an Alternative
 

@@ -72,7 +72,7 @@ Current behavior requires clicking the Search button because Enter inserts a new
 
 ### Selectable alternative words
 
-**Status:** Design complete; awaiting implementation
+**Status:** Implemented and manually validated
 
 The intended target appeared somewhere among bestWord plus the three alternatives in 95% of the 40 post-revision evaluation tests.
 
@@ -104,7 +104,22 @@ Apply the same completion behavior to initial and refined results.
 
 Recognition of an already-returned candidate is preferred over unnecessary additional inference.
 
-The interaction is specified in Decision 031 and is not yet implemented.
+Decision 031 has been implemented and manually validated.
+
+Validated behavior:
+
+* Main That's it acceptance works.
+* Initial Alternative acceptance works.
+* Not quite continues into the existing bounded clarification flow.
+* Refined bestWord and refined Alternatives can be accepted.
+* Successful acceptance produces the approved completion state and thank-you message.
+* Alternative acceptance makes no additional model or API request.
+* Alternatives use keyboard-accessible native button semantics while selectable.
+* The implementation was manually validated on desktop and mobile.
+
+Validated implementation checkpoint:
+
+`f4a9330 - Add selectable alternative feedback`
 
 ### Lexical-family and morphological-form retrieval
 
